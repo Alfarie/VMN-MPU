@@ -6,6 +6,9 @@ new VmnSocket(ws.getIO())
 import AWSManager from './types/aws/aws';
 new AWSManager()
 
+import DeviceIO from './types/device-io/device'
+new DeviceIO();
+
 
 // import { InitVmnLogger } from './types/simulation/generate-sensors-logger'
 

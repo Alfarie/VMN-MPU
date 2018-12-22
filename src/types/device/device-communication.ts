@@ -490,12 +490,12 @@ export class TransmitionManager {
     private requestRoutine() {
         setInterval(() => {
             if (this.serialPort.isAvailable()) {
-                
                 this.serialPort.getTransmiter().write('{Gdatetime}')
                 this.serialPort.getTransmiter().write('{Gnodes}')
+                this.serialPort.getTransmiter().write('{Ggpio}')
                 /*
                     this.serialPort.getTransmiter().write('{Gparacc}')
-                    this.serialPort.getTransmiter().write('{Ggpio}')
+                    
                     this.serialPort.getTransmiter().write('{Gsensors}')
                 */
             }
@@ -506,14 +506,14 @@ export class TransmitionManager {
         console.log('[Info] Requesting: control');
         this.serialPort.getTransmiter().write('{Gcontrol,channelstatus,1,4}');
         this.serialPort.getTransmiter().write('{Gcontrol,timer,1,4}');
-        this.serialPort.getTransmiter().write('{Gcontrol,setbound,1,4}');
-        this.serialPort.getTransmiter().write('{Gcontrol,setpoint,1,4}');
-        this.serialPort.getTransmiter().write('{Gcontrol,sbtiming,1,4}');
-        this.serialPort.getTransmiter().write('{Gcontrol,irrigation,1,4}');
-        this.serialPort.getTransmiter().write('{Gcontrol,dfirrigation,1,4}');
-        this.serialPort.getTransmiter().write('{Gcontrol,advcond,1,4}');
-        this.serialPort.getTransmiter().write('{Gcontrol,advsb,1,4}');
-        this.serialPort.getTransmiter().write('{Gcontrol,advsbt,1,4}');
+        // this.serialPort.getTransmiter().write('{Gcontrol,setbound,1,4}');
+        // this.serialPort.getTransmiter().write('{Gcontrol,setpoint,1,4}');
+        // this.serialPort.getTransmiter().write('{Gcontrol,sbtiming,1,4}');
+        // this.serialPort.getTransmiter().write('{Gcontrol,irrigation,1,4}');
+        // this.serialPort.getTransmiter().write('{Gcontrol,dfirrigation,1,4}');
+        // this.serialPort.getTransmiter().write('{Gcontrol,advcond,1,4}');
+        // this.serialPort.getTransmiter().write('{Gcontrol,advsb,1,4}');
+        // this.serialPort.getTransmiter().write('{Gcontrol,advsbt,1,4}');
         this.serialPort.getTransmiter().write('{done}')
     }
 }
