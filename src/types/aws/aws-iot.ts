@@ -1,20 +1,23 @@
+
 import awsIot from 'aws-iot-device-sdk'
-import GetMac from './getmac';
-import Configuration from '../configuration';
-import path from 'path'
 import AWSTransmitter from './aws-transmiter'
 import AWSReciever from './aws-reciever'
+import Configuration from '../configuration';
 import * as Rx from 'rxjs'
+import GetMac from './getmac';
+import path from 'path'
+
 export default class AWSIOT {
-    mid: String;
-    device:any;
-    shadow:any;
-    thingName:String;
-    awsTransmitter: AWSTransmitter
-    awsReciever:AWSReciever
-    onDeviceStatus: Rx.Subject<any>
-    onShadowDelta: Rx.Subject<any>
-    certPath: String = path.join(path.resolve(__dirname, '../../../../'));
+    public mid: string;
+    public awsReciever:AWSReciever
+    public awsTransmitter: AWSTransmitter
+    public thingName: string;
+    public onDeviceStatus: Rx.Subject<any>
+    public onShadowDelta: Rx.Subject<any>
+    private device:any;
+    private shadow:any;
+    private certPath: string = path.join(path.resolve(__dirname, '../../../../'));
+
     constructor(){
         console.log("cert path: " + this.certPath);
         this.init()
@@ -22,40 +25,71 @@ export default class AWSIOT {
         this.awsReciever = new AWSReciever(this)
     }
 
-    private async init(){
+    public publish = (topic, jsonMsg) => { 
+        this.device.publish(topic, JSON.stringify(jsonMsg));
+    }
+
+    public subscribe = (topic, {}) => {
+        console.log('[INFO] AWS Subscribe ' + topic);
+        this.device.subscribe(topic);
+    }
+
+    public updateThingShadow = (data) => {
+        const state = { state: { reported: data, desired: null } };
+        const clientTokenUpdate = this.shadow.update(this.thingName, state);
+        if (clientTokenUpdate === null) {
+            console.log('[Error] update shadow failed, operation still in progress');
+        }
+        else {
+            console.log('[Info] update shadow successful');
+        }
+    }
+
+    public clearDesired = () => {
+        const state = { state: { desired: null } };
+        const clientTokenUpdate = this.shadow.update(this.thingName, state);
+        if (clientTokenUpdate === null) {
+            console.log('[Error] update shadow failed, operation still in progress');
+        }
+        else {
+            console.log('[Info] update shadow successful');
+        }
+    }
+
+    private  init = async () =>{
         this.onDeviceStatus = new Rx.Subject();
         this.onShadowDelta = new Rx.Subject();
         this.mid = await GetMac.getMac(Configuration.getConfig().interface)
         console.log(this.mid)
         this.thingName = this.mid;
         const clientId = this.mid;
-        var lwt_payload = {
+        const lwtPayload = {
             connection: false,
             mid: this.thingName
         }
-        var cert_shadow = {
-            keyPath: this.certPath + '/cert/private.pem.key',
-            certPath: this.certPath + '/cert/certificate.pem.crt',
+        const certShadow = {
             caPath: this.certPath + '/cert/root-CA.crt',
+            certPath: this.certPath + '/cert/certificate.pem.crt',
+            clientId: '12345678910',
             host: 'a36i6p8e4cz1dq.iot.ap-southeast-1.amazonaws.com',
-            clientId: '12345678910'
+            keyPath: this.certPath + '/cert/private.pem.key',
         }
-        var cert_device = {
-            keyPath: this.certPath + '/cert/private.pem.key',
-            certPath: this.certPath + '/cert/certificate.pem.crt',
+        const certDevice = {
             caPath: this.certPath + '/cert/root-CA.crt',
-            host: 'a36i6p8e4cz1dq.iot.ap-southeast-1.amazonaws.com',
+            certPath: this.certPath + '/cert/certificate.pem.crt',
             clientId: '12345678911',
+            host: 'a36i6p8e4cz1dq.iot.ap-southeast-1.amazonaws.com',
+            keyPath: this.certPath + '/cert/private.pem.key',
             will: {
-                topic: 'LWT_UPDATE',
-                payload: JSON.stringify(lwt_payload)
+                payload: JSON.stringify(lwtPayload),
+                topic: 'LWT_UPDATE'
             }
         }
 
-        cert_device['clientId'] = clientId + '-device';
-        cert_shadow['clientId'] = clientId + '-shadow';
-        this.device = awsIot.device(cert_device);
-        this.shadow = awsIot.thingShadow(cert_shadow);
+        certDevice.clientId = clientId + '-device';
+        certShadow.clientId = clientId + '-shadow';
+        this.device = awsIot.device(certDevice);
+        this.shadow = awsIot.thingShadow(certShadow);
         this.shadow.on('connect', () => {
             console.log('[Info] AWS-IoT Shadow CONNECTED')
             this.shadow.register(this.thingName, {}, () => {
@@ -99,34 +133,5 @@ export default class AWSIOT {
         });
     }
 
-    public publish(topic, jsonMsg) { 
-        this.device.publish(topic, JSON.stringify(jsonMsg));
-    }
-
-    public subscribe(topic, {}) {
-        console.log('[INFO] AWS Subscribe ' + topic);
-        this.device.subscribe(topic);
-    }
-
-    public updateThingShadow(data) {
-        var state = { state: { reported: data, desired: null } };
-        const clientTokenUpdate = this.shadow.update(this.thingName, state);
-        if (clientTokenUpdate === null) {
-            console.log('[Error] update shadow failed, operation still in progress');
-        }
-        else {
-            console.log('[Info] update shadow successful');
-        }
-    }
-
-    public clearDesired(){
-        var state = { state: { desired: null } };
-        const clientTokenUpdate = this.shadow.update(this.thingName, state);
-        if (clientTokenUpdate === null) {
-            console.log('[Error] update shadow failed, operation still in progress');
-        }
-        else {
-            console.log('[Info] update shadow successful');
-        }
-    }
+    
 }

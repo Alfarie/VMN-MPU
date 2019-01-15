@@ -5,12 +5,13 @@
     // TODO: allow devDependencies only in **/*.spec.ts files:
     // waiting on https://github.com/palantir/tslint/pull/3708
     "no-implicit-dependencies": [true, "dev"],
-
+    "ordered-imports": false,
+    "no-console": false,
     /* tslint-immutable rules */
     // Recommended built-in rules
     "no-var-keyword": true,
     "no-parameter-reassignment": true,
-    "typedef": [true, "call-signature"],
+    "typedef": [true, "call-signature"]
     // Immutability rules
     // "readonly-keyword": false,
     // "readonly-array": true,

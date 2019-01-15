@@ -23,7 +23,7 @@ export default class VmnLoggerRouter extends Router {
                             station: sta,
                             datetime: row.datetime,
                             ec: row.nodes[sta].ec,
-                            volume: row.nodes[sta].ec
+                            volume: row.nodes[sta].volume
                         }
                     )))
                 })

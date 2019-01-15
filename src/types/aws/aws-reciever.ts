@@ -1,22 +1,23 @@
 import AWSIOT from './aws-iot'
 import DeviceManager from '../device/device';
+
 export default class AWSReciever {
-    awsIot: AWSIOT
+    private awsIot: AWSIOT
     constructor(iot: AWSIOT) {
         this.awsIot = iot
         this.init()
     }
 
-    private init() {
+    private init = () => {
         console.log('[Info] AWS-IOT Ready.')
         this.awsIot.onShadowDelta.asObservable().subscribe(stateObject => {
-            var state = stateObject.state;
+            const state = stateObject.state;
             if (state.control) {
-                var chStr = Object.keys(state.control)[0];
+                const chStr = Object.keys(state.control)[0];
                 // var ch = parseInt(chStr.replace('ch', ''));
                 // var ctrlCh = JSON.parse(JSON.stringify( mcu.GetControl()[ch - 1] ))
-                var ctrlCh = JSON.parse(JSON.stringify(DeviceManager.getDeviceData().control[0] ))
-                var objChange = Object.keys(state.control[chStr]);
+                const ctrlCh = JSON.parse(JSON.stringify(DeviceManager.getDeviceData().control[0] ))
+                const objChange = Object.keys(state.control[chStr]);
                 objChange.forEach(key => {
                     if (Object.keys(state.control[chStr][key]).length > 0) {
                         Object.keys(state.control[chStr][key]).forEach(key2 => {
